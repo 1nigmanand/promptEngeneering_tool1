@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Engineering Challenge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Suppress CDN production warning for development/demo purposes
+      if (typeof tailwind !== 'undefined' && tailwind.config) {
+        // Mark as development build to suppress warning
+        window.process = window.process || {};
+        window.process.env = window.process.env || {};
+        window.process.env.NODE_ENV = 'development';
+      }
+      
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Share Tech Mono"', 'sans-serif'],
+              display: ['Orbitron', 'sans-serif'],
+            },
+            colors: {
+              'cyber-bg': '#0a0a1a',
+              'cyber-surface': '#1a1a3a',
+              'cyber-primary': '#00f2ff',
+              'cyber-secondary': '#ff00ff',
+              'cyber-accent': '#00ff7f',
+              'cyber-text': '#d0d0ff',
+              'cyber-dim': '#8c8ca0',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-in-out',
+              'slide-in-up': 'slideInUp 0.5s ease-in-out',
+              'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'pulse-green': 'pulse-green 1s ease-in-out',
+              'pulse-red': 'pulse-red 1s ease-in-out',
+              'fade-out-up': 'fadeOutUp 1s ease-in-out forwards',
+              'grid-pan': 'gridPan 60s linear infinite',
+              'glow': 'glow 2s ease-in-out infinite alternate',
+              'flicker': 'flicker 1.5s infinite alternate',
+              'border-flicker': 'border-flicker 3s steps(1, end) infinite',
+              'pulse-corners': 'pulse-corners 2.5s ease-in-out infinite',
+              'streak-pop': 'streak-pop 0.6s ease-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideInUp: {
+                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+              fadeOutUp: {
+                '0%': { transform: 'translateY(0)', opacity: '1' },
+                '100%': { transform: 'translateY(-100px)', opacity: '0' },
+              },
+              gridPan: {
+                '0%': { 'background-position': '0% 0%' },
+                '100%': { 'background-position': '100% 100%' },
+              },
+              glow: {
+                'from': { 'box-shadow': '0 0 5px #00f2ff, 0 0 10px #00f2ff, 0 0 15px #00f2ff' },
+                'to': { 'box-shadow': '0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff' },
+              },
+               flicker: {
+                '0%, 100%': { opacity: 1 },
+                '50%': { opacity: 0.7 },
+              },
+              'pulse-green': {
+                '0%, 100%': { transform: 'scale(1)', 'text-shadow': 'none' },
+                '50%': { transform: 'scale(1.1)', 'text-shadow': '0 0 10px #00ff7f, 0 0 20px #00ff7f' },
+              },
+              'pulse-red': {
+                '0%, 100%': { transform: 'scale(1)', 'text-shadow': 'none' },
+                '50%': { transform: 'scale(1.1)', 'text-shadow': '0 0 10px #ff0000, 0 0 20px #ff0000' },
+              },
+              'border-flicker': {
+                '0%': { 'border-opacity': '0.2' },
+                '2%': { 'border-opacity': '1' },
+                '8%': { 'border-opacity': '0.2' },
+                '10%': { 'border-opacity': '1' },
+                '28%': { 'border-opacity': '0.2' },
+                '30%': { 'border-opacity': '1' },
+                '55%': { 'border-opacity': '0.2' },
+                '56%': { 'border-opacity': '1' },
+                '100%': { 'border-opacity': '0.2' },
+              },
+              'pulse-corners': {
+                '0%, 100%': { 'border-opacity': '1' },
+                '50%': { 'border-opacity': '0.4' },
+              },
+              'streak-pop': {
+                '0%': { transform: 'scale(1)' },
+                '50%': { transform: 'scale(1.5)', color: '#00ff7f', 'text-shadow': '0 0 10px #00ff7f' },
+                '100%': { transform: 'scale(1)' },
+              },
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      .title-scan { position: relative; overflow: hidden; }
+      .title-scan::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 20%;
+        height: 200%;
+        background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+        animation: title-scan-anim 4s ease-in-out infinite;
+        transform: skewX(-25deg);
+      }
+      @keyframes title-scan-anim {
+        0% { left: -50%; }
+        100% { left: 150%; }
+      }
+      .glitch-button {
+        position: relative;
+      }
+      .glitch-button::after,
+      .glitch-button::before {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        pointer-events: none;
+      }
+      .glitch-button:hover::before {
+        transform: translate(-0.05em, -0.025em);
+        color: var(--tw-cyber-secondary);
+        opacity: 1;
+        animation: glitch-flicker 0.4s infinite alternate;
+      }
+      .glitch-button:hover::after {
+        transform: translate(0.05em, 0.025em);
+        color: var(--tw-cyber-accent);
+        opacity: 1;
+        animation: glitch-flicker 0.4s infinite alternate-reverse;
+      }
+      @keyframes glitch-flicker {
+        0% { opacity: 1; clip-path: inset(50% 0 30% 0); }
+        50% { opacity: 0.6; clip-path: inset(10% 0 80% 0); }
+        100% { opacity: 1; clip-path: inset(70% 0 5% 0); }
+      }
+      .scanner-bar {
+        position: absolute;
+        top: 0;
+        width: 10px;
+        height: 100%;
+        background: #00f2ff;
+        box-shadow: 0 0 15px #00f2ff, 0 0 30px #00f2ff;
+        transform: skewX(-20deg);
+        animation: scanner-bar-anim 2s ease-in-out infinite;
+      }
+      @keyframes scanner-bar-anim {
+        0% { left: -20%; opacity: 0.5; }
+        50% { opacity: 1; }
+        100% { left: 120%; opacity: 0.5; }
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.14.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-cyber-bg text-cyber-text font-sans">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

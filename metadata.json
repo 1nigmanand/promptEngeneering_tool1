@@ -1,0 +1,5 @@
+{
+  "name": "Prompt Engineering Challenge V1",
+  "description": "A lightweight tool for students to learn prompt engineering for image generation. Students are given challenges to generate specific images by writing descriptive prompts, with an AI-powered analysis to score their results.",
+  "requestFramePermissions": []
+}
