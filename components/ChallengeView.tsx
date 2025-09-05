@@ -55,6 +55,45 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({
   analysisResultRef,
 }) => {
   const [targetImageSrc, setTargetImageSrc] = useState<string | null>(null);
+  
+  // 🎯 Phase management for step-by-step process
+  const [currentPhase, setCurrentPhase] = useState<'input' | 'generating' | 'image-ready' | 'evaluating' | 'complete'>('input');
+  const [showEvaluationAnimation, setShowEvaluationAnimation] = useState(false);
+
+  // Reset phase when new challenge starts
+  useEffect(() => {
+    setCurrentPhase('input');
+    setShowEvaluationAnimation(false);
+  }, [challenge.id]);
+
+  // Handle phase transitions based on props
+  useEffect(() => {
+    if (isLoading && loadingMessage.includes('SYNTHESIZING')) {
+      // Only set to generating phase for image synthesis
+      setCurrentPhase('generating');
+      setShowEvaluationAnimation(false);
+    } else if (isLoading && loadingMessage.includes('ANALYZING')) {
+      // Analysis phase - keep image visible with overlay
+      setCurrentPhase('evaluating');
+      setShowEvaluationAnimation(true);
+    } else if (generatedImage && !analysisResult && !isLoading) {
+      // Image is ready, show it immediately 
+      setCurrentPhase('image-ready');
+      // Then start evaluation after a brief moment to let user see the image
+      const timer = setTimeout(() => {
+        setCurrentPhase('evaluating');
+        setShowEvaluationAnimation(true);
+      }, 300); // Show image clearly for 0.3 seconds first
+      return () => clearTimeout(timer);
+    } else if (analysisResult && !isLoading) {
+      // 🎯 Analysis complete and loading stopped - stop animation first, then show feedback
+      setShowEvaluationAnimation(false);
+      const timer = setTimeout(() => {
+        setCurrentPhase('complete');
+      }, 300); // Give enough time for animation to stop gracefully
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, loadingMessage, generatedImage, analysisResult]);
 
   useEffect(() => {
     let objectUrl: string | null = null;
@@ -96,10 +135,71 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({
                 )}
             </HudFrame>
             <HudFrame title="GENERATION">
-                {isLoading ? (
+                {currentPhase === 'generating' ? (
                   <div className="text-center">
                     <Spinner />
                     <p className="mt-2 text-cyber-primary animate-flicker font-bold tracking-widest">{loadingMessage}</p>
+                  </div>
+                ) : currentPhase === 'image-ready' ? (
+                  <div className="relative">
+                    <img src={generatedImage} alt="AI generated image" className="w-full h-full object-cover animate-fade-in" />
+                    <div className="absolute inset-0 bg-cyber-primary/10 animate-pulse-once"></div>
+                    <div className="absolute bottom-2 left-2 right-2 text-center">
+                      <p className="text-cyber-primary font-bold tracking-widest animate-flicker">IMAGE GENERATED</p>
+                    </div>
+                  </div>
+                ) : currentPhase === 'evaluating' ? (
+                  <div className="relative">
+                    <img src={generatedImage} alt="AI generated image" className="w-full h-full object-cover" />
+                    {showEvaluationAnimation && (
+                      <div className="absolute inset-0">
+                        {/* Scanning overlay with moving lines */}
+                        <div className="absolute inset-0 bg-cyber-bg/60 flex items-center justify-center">
+                          {/* Horizontal scanning lines */}
+                          <div className="absolute inset-0 overflow-hidden">
+                            <div className="absolute w-full h-0.5 bg-cyber-accent shadow-lg shadow-cyber-accent/50 animate-evaluation-scan"></div>
+                            <div className="absolute w-full h-0.5 bg-cyber-accent/60 shadow-lg shadow-cyber-accent/30 animate-evaluation-scan" style={{ animationDelay: '1s' }}></div>
+                          </div>
+                          
+                          {/* Vertical scanning grid */}
+                          <div className="absolute inset-0 opacity-30">
+                            <div className="grid-scan-overlay"></div>
+                          </div>
+                          
+                          {/* Center analysis indicator */}
+                          <div className="relative z-10 text-center space-y-4">
+                            <div className="relative">
+                              {/* Rotating scanner ring */}
+                              <div className="w-16 h-16 border-4 border-transparent border-t-cyber-accent border-r-cyber-accent animate-spin rounded-full mx-auto"></div>
+                              <div className="absolute inset-0 w-16 h-16 border-2 border-cyber-accent/30 rounded-full mx-auto animate-pulse"></div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <p className="text-cyber-accent font-bold tracking-widest animate-pulse text-lg">
+                                SCANNING IMAGE
+                              </p>
+                              <p className="text-cyber-primary font-bold tracking-wider animate-flicker text-sm">
+                                EVALUATING SIMILARITY...
+                              </p>
+                            </div>
+                            
+                            {/* Progress dots */}
+                            <div className="flex justify-center space-x-2">
+                              <div className="w-2 h-2 bg-cyber-accent rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                              <div className="w-2 h-2 bg-cyber-accent rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></div>
+                              <div className="w-2 h-2 bg-cyber-accent rounded-full animate-bounce" style={{ animationDelay: '400ms' }}></div>
+                              <div className="w-2 h-2 bg-cyber-accent rounded-full animate-bounce" style={{ animationDelay: '600ms' }}></div>
+                            </div>
+                          </div>
+                          
+                          {/* Corner scan indicators */}
+                          <div className="absolute top-2 left-2 w-8 h-8 border-t-2 border-l-2 border-cyber-accent animate-pulse"></div>
+                          <div className="absolute top-2 right-2 w-8 h-8 border-t-2 border-r-2 border-cyber-accent animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                          <div className="absolute bottom-2 left-2 w-8 h-8 border-b-2 border-l-2 border-cyber-accent animate-pulse" style={{ animationDelay: '1s' }}></div>
+                          <div className="absolute bottom-2 right-2 w-8 h-8 border-b-2 border-r-2 border-cyber-accent animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : generatedImage ? (
                   <img src={generatedImage} alt="AI generated image" className="w-full h-full object-cover" />
@@ -116,9 +216,9 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({
                   onChange={(e) => onPromptChange(e.target.value)}
                   placeholder="Enter prompt here..."
                   className="w-full h-28 p-3 bg-cyber-surface/80 rounded-md border-2 border-cyber-secondary/50 focus:border-cyber-secondary focus:ring-2 focus:ring-cyber-secondary/50 focus:outline-none transition-all text-cyber-text placeholder:text-cyber-dim font-sans"
-                  disabled={isLoading}
+                  disabled={currentPhase === 'generating' || currentPhase === 'evaluating'}
                 />
-                {isLoading && (
+                {currentPhase === 'generating' && (
                   <div className="absolute inset-0 rounded-md overflow-hidden pointer-events-none">
                     <div className="scanner-bar"></div>
                   </div>
@@ -126,11 +226,17 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({
             </div>
             <button
               onClick={onGenerate}
-              disabled={isLoading || !prompt}
+              disabled={currentPhase === 'generating' || currentPhase === 'evaluating' || !prompt}
               className="glitch-button w-full py-3 px-6 bg-cyber-primary text-cyber-bg font-bold text-lg rounded-md transition-all duration-300 disabled:bg-cyber-dim disabled:cursor-not-allowed transform hover:scale-105 active:scale-100 hover:shadow-lg hover:shadow-cyber-primary/50"
-              data-text={isLoading ? 'Processing...' : 'GENERATE & ANALYZE'}
+              data-text={
+                currentPhase === 'generating' ? 'GENERATING...' : 
+                currentPhase === 'evaluating' ? 'EVALUATING...' : 
+                'GENERATE & ANALYZE'
+              }
             >
-              {isLoading ? 'Processing...' : 'GENERATE & ANALYZE'}
+              {currentPhase === 'generating' ? 'GENERATING...' : 
+               currentPhase === 'evaluating' ? 'EVALUATING...' : 
+               'GENERATE & ANALYZE'}
             </button>
             {error && <p className="text-red-400 text-center">{error}</p>}
           </div>
@@ -140,7 +246,7 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({
       </div>
 
 
-      {analysisResult && (
+      {analysisResult && currentPhase === 'complete' && (
         <div ref={analysisResultRef} className="bg-cyber-surface/70 p-6 rounded-lg border-2 border-cyber-primary/30 animate-slide-in-up space-y-6">
           <h3 className="text-2xl font-display font-bold text-white tracking-wider">ANALYSIS RESULT</h3>
           

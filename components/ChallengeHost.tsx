@@ -181,11 +181,17 @@ const ChallengeHost: React.FC<ChallengeHostProps> = ({
       setLoadingMessage('SYNTHESIZING IMAGE...');
       const imageB64 = await generateImage(prompt, selectedService, user.email);
       
-      // Both Pollinations and Gemini services return complete data URLs
-      // No need to add prefix as it's already included
+      // 🎯 Image ready होते ही UI पे दिखा देते हैं
       setGeneratedImage(imageB64);
-
+      setIsLoading(false); // Generation complete, show image
+      
+      // Wait a moment for user to see the image, then start analysis
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Now start analysis
+      setIsLoading(true);
       setLoadingMessage('ANALYZING RESULTS...');
+      
       // Extract raw base64 for analysis service
       const rawBase64 = imageB64.split(',')[1];
       
@@ -210,7 +216,11 @@ const ChallengeHost: React.FC<ChallengeHostProps> = ({
       }
       
       onStopScanningSound();
+      setIsLoading(false); // Stop loading before setting analysis result
       setAnalysisResult(result);
+
+      // Start similarity meter sound immediately when bar starts animating
+      onPlaySimilarityScoreSound(result.similarityScore);
 
       const currentProgress = challengeProgress[currentChallenge.id];
       const newSimilarityScore = result.similarityScore;
@@ -251,11 +261,11 @@ const ChallengeHost: React.FC<ChallengeHostProps> = ({
         return newProgress;
       });
 
-      // --- Audio Orchestration ---
+      // --- Audio Orchestration (after similarity sound has started) ---
       const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-      // 1. Play similarity meter sound. This now handles pause/resume of bg music.
-      await onPlaySimilarityScoreSound(result.similarityScore);
+      // Wait for similarity meter animation to complete (1 second as per CSS)
+      await delay(1000);
 
       // 2. Play streak sound (if any) and wait
       if (streakChanged !== 'none') {
@@ -273,8 +283,8 @@ const ChallengeHost: React.FC<ChallengeHostProps> = ({
       onStopScanningSound(); // Also stop on error
       console.error(err);
       setError(err.message || 'An unexpected error occurred.');
+      setIsLoading(false); // Only set loading false on error
     } finally {
-      setIsLoading(false);
       setLoadingMessage('');
     }
   }, [

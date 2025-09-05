@@ -7,6 +7,7 @@ import { imageCache, promptCache } from '../utils/IntelligentCache';
 import { rateLimiter } from '../utils/RateLimiter';
 import { responseOptimizer } from '../utils/ResponseOptimizer';
 import { firebaseIntegration } from './firebaseService';
+import { autoSavePromptAndImage } from './storageService';
 
 // --- API Key Management ---
 interface ApiKeyInfo {
@@ -305,6 +306,14 @@ const processImageGeneration = async (
 
     const processingTime = Date.now() - startTime;
     logger.logResponseSent(requestId, processingTime, 'MISS');
+    
+    // 🎯 AUTO-SAVE: Automatically save prompt and image to storage API
+    if (prompt && imageData) {
+      // Don't await - let it save in background without blocking response
+      autoSavePromptAndImage(prompt, imageData).catch(err => 
+        console.log('📱 Background auto-save failed (non-critical):', err.message)
+      );
+    }
     
     return imageData;
 

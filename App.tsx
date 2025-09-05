@@ -7,6 +7,7 @@ import { audioSources } from './services/audioService';
 import { persistenceService, ProgressData } from './services/persistenceService';
 import { firebaseIntegration } from './services/firebaseService';
 import { logger } from './utils/Logger';
+import { setUserEmail } from './services/storageService';
 import AuthScreen from './components/AuthScreen';
 import ChallengeHost from './components/ChallengeHost';
 import Spinner from './components/Spinner';
@@ -315,11 +316,19 @@ const App: React.FC = () => {
 
   const handleLogin = async (email: string, password: string) => {
     const loggedInUser = await login(email, password);
+    
+    // 🎯 Set user email for storage API
+    setUserEmail(email);
+    
     handleAuthSuccess(loggedInUser);
   };
 
   const handleSignup = async (email: string, password: string) => {
     const signedUpUser = await signup(email, password);
+    
+    // 🎯 Set user email for storage API
+    setUserEmail(email);
+    
     handleAuthSuccess(signedUpUser);
   };
 

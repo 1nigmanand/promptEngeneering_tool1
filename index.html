@@ -47,6 +47,10 @@
               'border-flicker': 'border-flicker 3s steps(1, end) infinite',
               'pulse-corners': 'pulse-corners 2.5s ease-in-out infinite',
               'streak-pop': 'streak-pop 0.6s ease-out',
+              // 🎯 New animations for phase transitions
+              'pulse-once': 'pulse-once 2s ease-in-out',
+              'evaluation-scan': 'evaluation-scan 2.5s ease-in-out infinite',
+              'bounce-dots': 'bounce-dots 1.4s ease-in-out infinite',
             },
             keyframes: {
               fadeIn: {
@@ -100,6 +104,21 @@
                 '0%': { transform: 'scale(1)' },
                 '50%': { transform: 'scale(1.5)', color: '#00ff7f', 'text-shadow': '0 0 10px #00ff7f' },
                 '100%': { transform: 'scale(1)' },
+              },
+              // 🎯 New animations for phase transitions
+              'pulse-once': {
+                '0%': { opacity: '0.4' },
+                '50%': { opacity: '1' },
+                '100%': { opacity: '0.4' },
+              },
+              'evaluation-scan': {
+                '0%': { transform: 'translateY(-100%)' },
+                '50%': { transform: 'translateY(50vh)' },
+                '100%': { transform: 'translateY(100vh)' },
+              },
+              'bounce-dots': {
+                '0%, 80%, 100%': { transform: 'scale(0)' },
+                '40%': { transform: 'scale(1)' },
               },
             }
           }
@@ -158,6 +177,19 @@
         50% { opacity: 0.6; clip-path: inset(10% 0 80% 0); }
         100% { opacity: 1; clip-path: inset(70% 0 5% 0); }
       }
+      .grid-scan-overlay {
+        background-image: 
+          linear-gradient(0deg, transparent 24%, rgba(0, 255, 127, 0.1) 25%, rgba(0, 255, 127, 0.1) 26%, transparent 27%, transparent 74%, rgba(0, 255, 127, 0.1) 75%, rgba(0, 255, 127, 0.1) 76%, transparent 77%, transparent),
+          linear-gradient(90deg, transparent 24%, rgba(0, 255, 127, 0.1) 25%, rgba(0, 255, 127, 0.1) 26%, transparent 27%, transparent 74%, rgba(0, 255, 127, 0.1) 75%, rgba(0, 255, 127, 0.1) 76%, transparent 77%, transparent);
+        background-size: 20px 20px;
+        animation: grid-scan-move 3s linear infinite;
+      }
+      
+      @keyframes grid-scan-move {
+        0% { background-position: 0 0; }
+        100% { background-position: 20px 20px; }
+      }
+      
       .scanner-bar {
         position: absolute;
         top: 0;
@@ -172,6 +204,37 @@
         0% { left: -20%; opacity: 0.5; }
         50% { opacity: 1; }
         100% { left: 120%; opacity: 0.5; }
+      }
+      
+      .progress-dots {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .progress-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(0, 255, 127, 0.3);
+        animation: pulse-dot 2s ease-in-out infinite;
+      }
+      
+      .progress-dot:nth-child(1) { animation-delay: 0s; }
+      .progress-dot:nth-child(2) { animation-delay: 0.5s; }
+      .progress-dot:nth-child(3) { animation-delay: 1s; }
+      .progress-dot:nth-child(4) { animation-delay: 1.5s; }
+      
+      @keyframes pulse-dot {
+        0%, 60%, 100% { 
+          background: rgba(0, 255, 127, 0.3);
+          transform: scale(1);
+        }
+        30% { 
+          background: rgba(0, 255, 127, 1);
+          transform: scale(1.3);
+        }
       }
     </style>
   <script type="importmap">
