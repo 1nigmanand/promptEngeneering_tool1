@@ -9,6 +9,13 @@ export default defineConfig(({ mode }) => {
       'process.env.GEMINI_API_KEY_2': JSON.stringify(env.GEMINI_API_KEY_2),
       'process.env.GEMINI_API_KEY_3': JSON.stringify(env.GEMINI_API_KEY_3),
       'process.env.GEMINI_API_KEY_4': JSON.stringify(env.GEMINI_API_KEY_4),
+      'process.env.GEMINI_API_KEY_5': JSON.stringify(env.GEMINI_API_KEY_5),
+      'process.env.GEMINI_API_KEY_6': JSON.stringify(env.GEMINI_API_KEY_6),
+      'process.env.GEMINI_API_KEY_7': JSON.stringify(env.GEMINI_API_KEY_7),
+      'process.env.GEMINI_API_KEY_8': JSON.stringify(env.GEMINI_API_KEY_8),
+      'process.env.GEMINI_API_KEY_9': JSON.stringify(env.GEMINI_API_KEY_9),
+      'process.env.GEMINI_API_KEY_10': JSON.stringify(env.GEMINI_API_KEY_10),
+      'process.env.GEMINI_API_KEY_11': JSON.stringify(env.GEMINI_API_KEY_11),
 
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY_1 || env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY_1 || env.GEMINI_API_KEY),

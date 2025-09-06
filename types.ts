@@ -23,7 +23,16 @@ export interface ChallengeProgress {
   previousSimilarityScore: number;
 }
 
-export type ImageService = 'pollinations-flux' | 'pollinations-kontext' | 'pollinations-krea' | 'gemini-imagen-3' | 'gemini-imagen-4-fast' | 'gemini-imagen-4-ultra';
+export type ImageService = 
+  | 'pollinations-flux' 
+  | 'pollinations-kontext' 
+  | 'pollinations-krea' 
+  | 'pollinations-turbo'
+  | 'pollinations-enhancer'
+  | 'pollinations-playground'
+  | 'gemini-imagen-3' 
+  | 'gemini-imagen-4-fast' 
+  | 'gemini-imagen-4-ultra';
 
 export type User = {
   email: string;
